@@ -1,324 +1,253 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutterquiz/core/theme/ibeere_tokens.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
 
 class MiniGamesScreen extends StatefulWidget {
   const MiniGamesScreen({super.key});
-
-  static const String routeName = '/mini-games';
 
   @override
   State<MiniGamesScreen> createState() => _MiniGamesScreenState();
 }
 
-class _MiniGamesScreenState extends State<MiniGamesScreen> {
-  List<Map<String, dynamic>> _games = [];
-  bool _isLoading = true;
-  String? _errorMessage;
+class _MiniGamesScreenState extends State<MiniGamesScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  final List<_MiniGame> _games = [
+    _MiniGame(
+      name: 'Tic Tac Toe',
+      description: 'Classic X and O game',
+      icon: Icons.grid_3x3,
+      color: Color(0xFF6C63FF),
+      route: '/game-tic-tac-toe',
+      players: '2 Players',
+    ),
+    _MiniGame(
+      name: 'Number Puzzle',
+      description: 'Match numbers to win',
+      icon: Icons.grid_4x4,
+      color: Color(0xFFEC4899),
+      route: '/game-number-puzzle',
+      players: '1 Player',
+    ),
+    _MiniGame(
+      name: 'Memory Cards',
+      description: 'Find matching pairs',
+      icon: Icons.layers,
+      color: Color(0xFF10B981),
+      route: '/game-memory-cards',
+      players: '1 Player',
+    ),
+    _MiniGame(
+      name: 'Guess the Word',
+      description: 'Word guessing challenge',
+      icon: Icons.abc,
+      color: Color(0xFFFFB800),
+      route: '/guessTheWord',
+      players: '1 Player',
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _fetchGames();
-  }
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
 
-  Future<void> _fetchGames() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _revealController.forward();
     });
-
-    try {
-      final response = await http.post(
-        Uri.parse('https://api.ibeere.fun/api/get_mini_games'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['error'] == false) {
-          setState(() {
-            _games = List<Map<String, dynamic>>.from(data['data']);
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _errorMessage = data['message'] ?? 'Failed to load games';
-            _isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          _errorMessage = 'Server error: ${response.statusCode}';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Network error: $e';
-        _isLoading = false;
-      });
-    }
   }
 
-  Future<void> _launchGame(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch game')),
-        );
-      }
-    }
-  }
-
-  Color _parseColor(String? colorString) {
-    if (colorString == null || colorString.isEmpty) {
-      return IbeereDesignTokens.primaryPurple;
-    }
-    
-    String hexColor = colorString.replaceAll('#', '');
-    if (hexColor.length == 6) {
-      hexColor = 'FF$hexColor';
-    }
-    
-    try {
-      return Color(int.parse(hexColor, radix: 16));
-    } catch (e) {
-      return IbeereDesignTokens.primaryPurple;
-    }
-  }
-
-  IconData _getIconForGameType(String iconType) {
-    switch (iconType.toLowerCase()) {
-      case 'public':
-        return Icons.public;
-      case 'grid_3x3':
-        return Icons.grid_3x3;
-      case 'memory':
-        return Icons.psychology;
-      case 'tag':
-        return Icons.tag;
-      case 'calculate':
-        return Icons.calculate;
-      case 'apps':
-        return Icons.apps;
-      case 'visibility':
-        return Icons.remove_red_eye;
-      case 'extension':
-        return Icons.extension;
-      default:
-        return Icons.sports_esports;
-    }
+  @override
+  void dispose() {
+    _revealController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: IbeereDesignTokens.backgroundLight,
-      body: SafeArea(
+      backgroundColor: const Color(0xFF1A1A2E),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          'Mini Games',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      body: FadeTransition(
+        opacity: _revealController,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(width: 40),
-                  Text(
-                    'Mini Games',
+                  const Text(
+                    'Take a Break',
                     style: TextStyle(
-                      color: IbeereDesignTokens.textPrimary.withOpacity(0.7),
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.close,
-                        color: IbeereDesignTokens.textSecondary,
-                        size: 22,
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Play fun mini games while learning',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 16,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _errorMessage != null
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: IbeereDesignTokens.textSecondary,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                _errorMessage!,
-                                style: TextStyle(
-                                  color: IbeereDesignTokens.textSecondary,
-                                  fontSize: 14,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 24),
-                              ElevatedButton(
-                                onPressed: _fetchGames,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: IbeereDesignTokens.primaryPurple,
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 32,
-                                    vertical: 12,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: const Text('Retry'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _fetchGames,
-                          child: GridView.builder(
-                            padding: const EdgeInsets.all(16),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: 0.95,
-                            ),
-                            itemCount: _games.length,
-                            itemBuilder: (context, index) {
-                              final game = _games[index];
-                              final color1 = _parseColor(game['gradient_color_1']);
-                              final color2 = _parseColor(game['gradient_color_2']);
-                              final icon = _getIconForGameType(game['game_icon'] ?? '');
+              child: GridView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.85,
+                ),
+                itemCount: _games.length,
+                itemBuilder: (context, index) {
+                  return _MiniGameCard(
+                    game: _games[index],
+                    onTap: () {
+                      HapticFeedback.mediumImpact();
+                      Navigator.pushNamed(context, _games[index].route);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                              return GestureDetector(
-                                onTap: () {
-                                  final gameUrl = game['game_url'];
-                                  if (gameUrl != null && gameUrl.isNotEmpty) {
-                                    _launchGame(gameUrl);
-                                  }
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [color1, color2],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(24),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: color1.withOpacity(0.3),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
-                                  ),
-                                  child: Stack(
-                                    children: [
-                                      Positioned(
-                                        top: -20,
-                                        right: -20,
-                                        child: Container(
-                                          width: 80,
-                                          height: 80,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.1),
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        bottom: -30,
-                                        left: -30,
-                                        child: Container(
-                                          width: 100,
-                                          height: 100,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(0.05),
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Container(
-                                              width: 64,
-                                              height: 64,
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withOpacity(0.25),
-                                                shape: BoxShape.circle,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.black.withOpacity(0.1),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 4),
-                                                  ),
-                                                ],
-                                              ),
-                                              child: Icon(
-                                                icon,
-                                                size: 36,
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            Text(
-                                              game['game_name'] ?? 'Game',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                letterSpacing: 0.5,
-                                              ),
-                                              textAlign: TextAlign.center,
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+class _MiniGame {
+  final String name;
+  final String description;
+  final IconData icon;
+  final Color color;
+  final String route;
+  final String players;
+
+  _MiniGame({
+    required this.name,
+    required this.description,
+    required this.icon,
+    required this.color,
+    required this.route,
+    required this.players,
+  });
+}
+
+class _MiniGameCard extends StatelessWidget {
+  final _MiniGame game;
+  final VoidCallback onTap;
+
+  const _MiniGameCard({
+    required this.game,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              game.color.withOpacity(0.3),
+              game.color.withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: game.color.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: game.color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Icon(
+                game.icon,
+                size: 40,
+                color: game.color,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              game.name,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              game.description,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.7),
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: game.color.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                game.players,
+                style: TextStyle(
+                  color: game.color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),

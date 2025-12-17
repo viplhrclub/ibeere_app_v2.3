@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/core/theme/design_tokens.dart';
-import 'package:flutterquiz/ui/widgets/ibeere_cards.dart';
-import 'package:flutterquiz/ui/widgets/ibeere_navigation.dart';
+import 'package:flutter/services.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -10,251 +8,286 @@ class NotificationsScreen extends StatefulWidget {
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen> {
+class _NotificationsScreenState extends State<NotificationsScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  bool _isLoading = false;
+  String _errorMessage = '';
+
   final List<_Notification> _notifications = [
     _Notification(
-      id: '1',
-      title: 'Quiz Available',
-      message: 'New Chemistry quiz is now available',
-      timestamp: 'Just now',
+      title: 'New Quiz Available!',
+      message: 'Science category has 10 new questions. Test your knowledge now!',
+      time: '2 mins ago',
       icon: Icons.quiz,
-      color: DesignTokens.primary,
-      isRead: false,
+      color: Color(0xFF6C63FF),
+      isUnread: true,
     ),
     _Notification(
-      id: '2',
-      title: 'Congratulations!',
-      message: 'You achieved 100% on Biology Quiz',
-      timestamp: '2 hours ago',
+      title: 'Achievement Unlocked',
+      message: 'You earned the "Quiz Master" badge for completing 50 quizzes!',
+      time: '1 hour ago',
       icon: Icons.emoji_events,
-      color: DesignTokens.success,
-      isRead: false,
+      color: Color(0xFFFFB800),
+      isUnread: true,
     ),
     _Notification(
-      id: '3',
-      title: 'Friend Achievement',
-      message: 'Ahmed Hassan unlocked Quiz Master badge',
-      timestamp: '5 hours ago',
-      icon: Icons.person,
-      color: const Color(0xFF5AC8FA),
-      isRead: true,
+      title: 'Friend Request',
+      message: 'Sarah sent you a friend request',
+      time: '3 hours ago',
+      icon: Icons.person_add,
+      color: Color(0xFF10B981),
+      isUnread: false,
     ),
     _Notification(
-      id: '4',
-      title: 'Streak Reminder',
-      message: 'Keep your 12-day streak alive!',
-      timestamp: 'Yesterday',
-      icon: Icons.local_fire_department,
-      color: DesignTokens.error,
-      isRead: true,
+      title: 'Daily Reward',
+      message: 'Claim your daily bonus of 100 coins!',
+      time: '5 hours ago',
+      icon: Icons.card_giftcard,
+      color: Color(0xFFEC4899),
+      isUnread: false,
     ),
     _Notification(
-      id: '5',
-      title: 'Leaderboard Update',
-      message: 'You moved up 3 positions on leaderboard',
-      timestamp: '2 days ago',
+      title: 'Challenge Accepted',
+      message: 'Mike accepted your quiz challenge!',
+      time: '1 day ago',
+      icon: Icons.sports_esports,
+      color: Color(0xFF6C63FF),
+      isUnread: false,
+    ),
+    _Notification(
+      title: 'New Level Unlocked',
+      message: 'You reached Level 15! Keep going!',
+      time: '2 days ago',
       icon: Icons.trending_up,
-      color: DesignTokens.warning,
-      isRead: true,
-    ),
-    _Notification(
-      id: '6',
-      title: 'New Feature',
-      message: 'Check out our new dark mode feature',
-      timestamp: '3 days ago',
-      icon: Icons.star,
-      color: const Color(0xFF8B5CF6),
-      isRead: true,
+      color: Color(0xFF10B981),
+      isUnread: false,
     ),
   ];
 
   @override
-  Widget build(BuildContext context) {
-    final unreadCount = _notifications.where((n) => !n.isRead).length;
-
-    return Scaffold(
-      backgroundColor: DesignTokens.background,
-      appBar: IbeereAppBar(
-        title: 'Notifications',
-        showBackButton: false,
-        actions: unreadCount > 0
-            ? [
-                Padding(
-                  padding: const EdgeInsets.only(right: DesignTokens.spaceMd),
-                  child: Center(
-                    child: TextButton(
-                      onPressed: () {
-                        // Mark all as read
-                      },
-                      child: const Text('Mark all read'),
-                    ),
-                  ),
-                ),
-              ]
-            : null,
-      ),
-      body: _notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_off,
-                    size: 64,
-                    color: Colors.grey[400],
-                  ),
-                  const SizedBox(height: DesignTokens.spaceLg),
-                  Text(
-                    'No Notifications',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spaceSm),
-                  Text(
-                    "You're all caught up!",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: DesignTokens.fontSizeBase,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(DesignTokens.spaceLg),
-              itemCount: _notifications.length,
-              itemBuilder: (context, index) {
-                final notification = _notifications[index];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: DesignTokens.spaceMd),
-                  child: _NotificationCard(notification: notification),
-                );
-              },
-            ),
+  void initState() {
+    super.initState();
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
     );
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _revealController.forward();
+    });
   }
-}
 
-class _NotificationCard extends StatelessWidget {
-
-  const _NotificationCard({required this.notification});
-  final _Notification notification;
+  @override
+  void dispose() {
+    _revealController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return IbeereCard(
-      backgroundColor: notification.isRead
-          ? DesignTokens.surface
-          : notification.color.withOpacity(0.05),
-      elevation: notification.isRead ? 0 : 2,
-      padding: const EdgeInsets.all(DesignTokens.spaceMd),
-      onTap: () {
-        // Navigate to notification details
-      },
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: notification.color.withOpacity(0.2),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              notification.icon,
-              color: notification.color,
-              size: 24,
-            ),
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A2E),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          'Notifications',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-          const SizedBox(width: DesignTokens.spaceMd),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        notification.title,
-                        style: TextStyle(
-                          fontSize: DesignTokens.fontSizeBase,
-                          fontWeight: DesignTokens.fontWeightBold,
-                          color: notification.isRead
-                              ? Colors.grey[700]
-                              : DesignTokens.primary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (!notification.isRead)
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: notification.color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: DesignTokens.spaceSm),
-                Text(
-                  notification.message,
-                  style: TextStyle(
-                    fontSize: DesignTokens.fontSizeSm,
-                    color: Colors.grey[600],
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: DesignTokens.spaceSm),
-                Text(
-                  notification.timestamp,
-                  style: TextStyle(
-                    fontSize: DesignTokens.fontSizeXs,
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: DesignTokens.spaceMd),
-          PopupMenuButton<void>(
-            itemBuilder: (context) => [
-              PopupMenuItem<void>(
-                child: const Text('Delete'),
-                onTap: () {},
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              setState(() {
+                for (var notification in _notifications) {
+                  notification.isUnread = false;
+                }
+              });
+            },
+            child: const Text(
+              'Mark all read',
+              style: TextStyle(
+                color: Color(0xFF6C63FF),
+                fontSize: 14,
               ),
-            ],
+            ),
           ),
         ],
+      ),
+      body: FadeTransition(
+        opacity: _revealController,
+        child: _notifications.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.notifications_none,
+                      size: 80,
+                      color: Colors.white.withOpacity(0.3),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No notifications yet',
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 18,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _notifications.length,
+                itemBuilder: (context, index) {
+                  final notification = _notifications[index];
+                  return _NotificationCard(
+                    notification: notification,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        notification.isUnread = false;
+                      });
+                    },
+                  );
+                },
+              ),
       ),
     );
   }
 }
 
 class _Notification {
-
-  _Notification({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.timestamp,
-    required this.icon,
-    required this.color,
-    required this.isRead,
-  });
-  final String id;
   final String title;
   final String message;
-  final String timestamp;
+  final String time;
   final IconData icon;
   final Color color;
-  final bool isRead;
+  bool isUnread;
+
+  _Notification({
+    required this.title,
+    required this.message,
+    required this.time,
+    required this.icon,
+    required this.color,
+    this.isUnread = false,
+  });
 }
 
+class _NotificationCard extends StatelessWidget {
+  final _Notification notification;
+  final VoidCallback onTap;
+
+  const _NotificationCard({
+    required this.notification,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: notification.isUnread
+                ? Colors.white.withOpacity(0.1)
+                : Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: notification.isUnread
+                  ? notification.color.withOpacity(0.3)
+                  : Colors.white.withOpacity(0.1),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: notification.color.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  notification.icon,
+                  color: notification.color,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            notification.title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: notification.isUnread
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (notification.isUnread)
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF6C63FF),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      notification.message,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 14,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      notification.time,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

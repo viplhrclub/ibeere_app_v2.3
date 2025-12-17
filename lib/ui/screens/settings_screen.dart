@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/core/theme/design_tokens.dart';
-import 'package:flutterquiz/ui/widgets/ibeere_buttons.dart';
-import 'package:flutterquiz/ui/widgets/ibeere_navigation.dart';
+import 'package:flutter/services.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -10,203 +8,260 @@ class SettingsScreen extends StatefulWidget {
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
+class _SettingsScreenState extends State<SettingsScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  bool _isLoading = false;
+  String _errorMessage = '';
   bool _notificationsEnabled = true;
-  bool _darkModeEnabled = false;
   bool _soundEnabled = true;
-  String _selectedLanguage = 'English';
-  bool _analyticsEnabled = true;
+  bool _vibrationEnabled = true;
+  bool _darkModeEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _revealController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _revealController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DesignTokens.background,
-      appBar: const IbeereAppBar(
-        title: 'Settings',
-        showBackButton: false,
+      backgroundColor: const Color(0xFF1A1A2E),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            Navigator.pop(context);
+          },
+        ),
+        title: const Text(
+          'Settings',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
+      body: FadeTransition(
+        opacity: _revealController,
+        child: ListView(
+          padding: const EdgeInsets.all(24),
           children: [
-            // Notification Settings
             _SettingsSection(
-              title: 'Notifications',
+              title: 'Preferences',
               children: [
-                _SettingsToggle(
-                  icon: Icons.notifications,
-                  title: 'Push Notifications',
-                  subtitle: 'Get notified about new quizzes',
-                  value: _notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() => _notificationsEnabled = value);
-                  },
+                _SettingsTile(
+                  icon: Icons.notifications_outlined,
+                  title: 'Notifications',
+                  subtitle: 'Receive quiz and achievement alerts',
+                  trailing: Switch(
+                    value: _notificationsEnabled,
+                    onChanged: (value) {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _notificationsEnabled = value;
+                      });
+                    },
+                    activeColor: const Color(0xFF6C63FF),
+                  ),
                 ),
-                _SettingsToggle(
-                  icon: Icons.volume_up,
+                _SettingsTile(
+                  icon: Icons.volume_up_outlined,
                   title: 'Sound Effects',
-                  subtitle: 'Play sounds on actions',
-                  value: _soundEnabled,
-                  onChanged: (value) {
-                    setState(() => _soundEnabled = value);
-                  },
+                  subtitle: 'Enable audio feedback',
+                  trailing: Switch(
+                    value: _soundEnabled,
+                    onChanged: (value) {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _soundEnabled = value;
+                      });
+                    },
+                    activeColor: const Color(0xFF6C63FF),
+                  ),
                 ),
-              ],
-            ),
-
-            // Display Settings
-            _SettingsSection(
-              title: 'Display',
-              children: [
-                _SettingsToggle(
-                  icon: Icons.dark_mode,
+                _SettingsTile(
+                  icon: Icons.vibration,
+                  title: 'Vibration',
+                  subtitle: 'Haptic feedback on interactions',
+                  trailing: Switch(
+                    value: _vibrationEnabled,
+                    onChanged: (value) {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _vibrationEnabled = value;
+                      });
+                    },
+                    activeColor: const Color(0xFF6C63FF),
+                  ),
+                ),
+                _SettingsTile(
+                  icon: Icons.dark_mode_outlined,
                   title: 'Dark Mode',
-                  subtitle: 'Enable dark theme',
-                  value: _darkModeEnabled,
-                  onChanged: (value) {
-                    setState(() => _darkModeEnabled = value);
-                  },
-                ),
-                _SettingsDropdown(
-                  icon: Icons.language,
-                  title: 'Language',
-                  value: _selectedLanguage,
-                  items: const ['English', 'Spanish', 'French', 'German', 'Arabic'],
-                  onChanged: (value) {
-                    setState(() => _selectedLanguage = value);
-                  },
-                ),
-              ],
-            ),
-
-            // Privacy & Security
-            _SettingsSection(
-              title: 'Privacy & Security',
-              children: [
-                _SettingsTile(
-                  icon: Icons.lock,
-                  title: 'Change Password',
-                  subtitle: 'Update your password',
-                  onTap: () {},
-                ),
-                _SettingsTile(
-                  icon: Icons.privacy_tip,
-                  title: 'Privacy Policy',
-                  subtitle: 'Read our privacy policy',
-                  onTap: () {},
-                ),
-                _SettingsToggle(
-                  icon: Icons.analytics,
-                  title: 'Share Analytics',
-                  subtitle: 'Help improve the app',
-                  value: _analyticsEnabled,
-                  onChanged: (value) {
-                    setState(() => _analyticsEnabled = value);
-                  },
-                ),
-              ],
-            ),
-
-            // About
-            _SettingsSection(
-              title: 'About',
-              children: [
-                _SettingsTile(
-                  icon: Icons.info,
-                  title: 'About Ibeere',
-                  subtitle: 'Learn about the app',
-                  onTap: () {},
-                ),
-                _SettingsTile(
-                  icon: Icons.help,
-                  title: 'Help & Support',
-                  subtitle: 'Get help and FAQs',
-                  onTap: () {},
-                ),
-                _SettingsTile(
-                  icon: Icons.bug_report,
-                  title: 'Report Bug',
-                  subtitle: 'Report a problem',
-                  onTap: () {},
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(DesignTokens.spaceLg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'App Version',
-                        style: TextStyle(
-                          fontSize: DesignTokens.fontSizeBase,
-                          fontWeight: DesignTokens.fontWeightMedium,
-                        ),
-                      ),
-                      const SizedBox(height: DesignTokens.spaceSm),
-                      Text(
-                        'v1.0.0',
-                        style: TextStyle(
-                          fontSize: DesignTokens.fontSizeSm,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
+                  subtitle: 'Use dark theme',
+                  trailing: Switch(
+                    value: _darkModeEnabled,
+                    onChanged: (value) {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _darkModeEnabled = value;
+                      });
+                    },
+                    activeColor: const Color(0xFF6C63FF),
                   ),
                 ),
               ],
             ),
-
-            // Logout
-            Padding(
-              padding: const EdgeInsets.all(DesignTokens.spaceLg),
-              child: IbeereSecondaryButton(
-                label: 'Logout',
-                isFullWidth: true,
-                textColor: DesignTokens.error,
-                borderColor: DesignTokens.error,
-                onPressed: _showLogoutDialog,
+            const SizedBox(height: 24),
+            _SettingsSection(
+              title: 'Account',
+              children: [
+                _SettingsTile(
+                  icon: Icons.person_outline,
+                  title: 'Edit Profile',
+                  subtitle: 'Update your information',
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.pushNamed(context, '/editProfile');
+                  },
+                ),
+                _SettingsTile(
+                  icon: Icons.language,
+                  title: 'Language',
+                  subtitle: 'English',
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.pushNamed(context, '/language-select');
+                  },
+                ),
+                _SettingsTile(
+                  icon: Icons.lock_outline,
+                  title: 'Privacy',
+                  subtitle: 'Manage your privacy settings',
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            _SettingsSection(
+              title: 'Support',
+              children: [
+                _SettingsTile(
+                  icon: Icons.help_outline,
+                  title: 'Help & FAQ',
+                  subtitle: 'Get help and answers',
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                  },
+                ),
+                _SettingsTile(
+                  icon: Icons.feedback_outlined,
+                  title: 'Send Feedback',
+                  subtitle: 'Share your thoughts',
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                  },
+                ),
+                _SettingsTile(
+                  icon: Icons.info_outline,
+                  title: 'About',
+                  subtitle: 'Version 2.3.7',
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    Navigator.pushNamed(context, '/aboutApp');
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: OutlinedButton(
+                onPressed: () {
+                  HapticFeedback.mediumImpact();
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      backgroundColor: const Color(0xFF252542),
+                      title: const Text(
+                        'Logout',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      content: const Text(
+                        'Are you sure you want to logout?',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pushReplacementNamed(context, '/login');
+                          },
+                          child: const Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: DesignTokens.spaceLg),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showLogoutDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Perform logout
-            },
-            child: Text(
-              'Logout',
-              style: TextStyle(color: DesignTokens.error),
-            ),
-          ),
-        ],
       ),
     );
   }
 }
 
 class _SettingsSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
 
   const _SettingsSection({
     required this.title,
     required this.children,
   });
-  final String title;
-  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -214,113 +269,72 @@ class _SettingsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(
-            DesignTokens.spaceLg,
-            DesignTokens.spaceLg,
-            DesignTokens.spaceLg,
-            DesignTokens.spaceMd,
-          ),
+          padding: const EdgeInsets.only(left: 8, bottom: 12),
           child: Text(
             title,
             style: TextStyle(
-              fontSize: DesignTokens.fontSizeSm,
-              fontWeight: DesignTokens.fontWeightBold,
-              color: DesignTokens.primary,
-              letterSpacing: 0.5,
+              color: Colors.white.withOpacity(0.5),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1,
             ),
           ),
         ),
-        ...children,
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.1),
+            ),
+          ),
+          child: Column(
+            children: children,
+          ),
+        ),
       ],
     );
   }
 }
 
 class _SettingsTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
 
   const _SettingsTile({
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.onTap,
+    this.trailing,
+    this.onTap,
   });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spaceLg),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceMd),
-          child: Row(
-            children: [
-              Icon(icon, color: DesignTokens.primary),
-              const SizedBox(width: DesignTokens.spaceLg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: DesignTokens.fontSizeBase,
-                        fontWeight: DesignTokens.fontWeightMedium,
-                      ),
-                    ),
-                    const SizedBox(height: DesignTokens.spaceSm),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: DesignTokens.fontSizeSm,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-                color: Colors.grey[400],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SettingsToggle extends StatelessWidget {
-
-  const _SettingsToggle({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final bool value;
-  final void Function(bool) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spaceLg),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceMd),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: DesignTokens.primary),
-            const SizedBox(width: DesignTokens.spaceLg),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFF6C63FF).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFF6C63FF),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,99 +342,33 @@ class _SettingsToggle extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: DesignTokens.fontSizeBase,
-                      fontWeight: DesignTokens.fontWeightMedium,
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: DesignTokens.spaceSm),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: DesignTokens.fontSizeSm,
-                      color: Colors.grey[600],
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 14,
                     ),
                   ),
                 ],
               ),
             ),
-            Switch(
-              value: value,
-              onChanged: onChanged,
-              thumbColor: WidgetStateProperty.resolveWith((states) {
-                if (states.contains(WidgetState.selected)) {
-                  return DesignTokens.primary;
-                }
-                return null;
-              }),
-            ),
+            if (trailing != null)
+              trailing!
+            else if (onTap != null)
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.white.withOpacity(0.5),
+                size: 16,
+              ),
           ],
         ),
       ),
     );
   }
 }
-
-class _SettingsDropdown extends StatelessWidget {
-
-  const _SettingsDropdown({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
-  final IconData icon;
-  final String title;
-  final String value;
-  final List<String> items;
-  final void Function(String) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: DesignTokens.spaceLg),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: DesignTokens.spaceMd),
-        child: Row(
-          children: [
-            Icon(icon, color: DesignTokens.primary),
-            const SizedBox(width: DesignTokens.spaceLg),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: DesignTokens.fontSizeBase,
-                      fontWeight: DesignTokens.fontWeightMedium,
-                    ),
-                  ),
-                  const SizedBox(height: DesignTokens.spaceSm),
-                  DropdownButton<String>(
-                    value: value,
-                    isExpanded: true,
-                    underline: const SizedBox.shrink(),
-                    items: items
-                        .map((item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(item),
-                        ))
-                        .toList(),
-                    onChanged: (newValue) {
-                      if (newValue != null) {
-                        onChanged(newValue);
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
