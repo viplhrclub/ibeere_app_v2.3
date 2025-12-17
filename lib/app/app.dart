@@ -47,7 +47,9 @@ final appThemeData = <Brightness, ThemeData>{
 Future<Widget> initializeApp() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  if (!kIsWeb) {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+  }
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarBrightness: Brightness.light,
@@ -92,11 +94,23 @@ Future<Widget> initializeApp() async {
   );
 
   // Local phone storage
-  await Hive.initFlutter();
-  await Hive.openBox<dynamic>(authBox);
-  await Hive.openBox<dynamic>(settingsBox);
-  await Hive.openBox<dynamic>(userDetailsBox);
-  await Hive.openBox<dynamic>(examBox);
+  if (kIsWeb) {
+    // Web uses IndexedDB
+    Hive.init('ibeere_web_storage');
+  } else {
+    await Hive.initFlutter();
+  }
+  
+  // Open Hive boxes
+  try {
+    await Hive.openBox<dynamic>(authBox);
+    await Hive.openBox<dynamic>(settingsBox);
+    await Hive.openBox<dynamic>(userDetailsBox);
+    await Hive.openBox<dynamic>(examBox);
+  } catch (e) {
+    // ignore: avoid_print
+    print('Hive initialization error: $e');
+  }
 
   return MyApp(firebaseConfigured: firebaseConfigured);
 }

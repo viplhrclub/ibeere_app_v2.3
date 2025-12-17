@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         // Navigate to home or onboarding screen
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed('/');
       }
     });
   }
