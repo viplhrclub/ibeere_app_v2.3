@@ -1,221 +1,327 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/core/theme/ibeere_tokens.dart';
-import 'package:flutterquiz/ui/widgets/ibeere_v2_buttons.dart';
+import 'package:flutter/services.dart';
 
-class QuizResultsScreen extends StatelessWidget {
+class QuizResultsScreen extends StatefulWidget {
   const QuizResultsScreen({super.key});
 
-  static const String routeName = '/quiz-results';
+  @override
+  State<QuizResultsScreen> createState() => _QuizResultsScreenState();
+}
+
+class _QuizResultsScreenState extends State<QuizResultsScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  bool _isLoading = false;
+  String _errorMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _revealController.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _revealController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final bool isWinner = true;
-    final int userScore = 280;
-    final int opponentScore = 190;
-    final int correctAnswers = 7;
-    final int totalQuestions = 10;
-    final int coinsEarned = 50;
-    final String accuracy = '70%';
+    final isVictory = true;
+    final score = 850;
+    final accuracy = 85;
+    final correctAnswers = 17;
+    final totalQuestions = 20;
+    final coinsEarned = 120;
 
     return Scaffold(
-      backgroundColor: IbeereDesignTokens.backgroundLight,
+      backgroundColor: const Color(0xFF1A1A2E),
       body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(top: -50, right: -50, child: _DecorativeCircle(color: isWinner ? IbeereDesignTokens.accentGreen.withOpacity(0.1) : IbeereDesignTokens.primaryRed.withOpacity(0.1), size: 200)),
-            Positioned(bottom: -60, left: -60, child: _DecorativeCircle(color: IbeereDesignTokens.primaryPurple.withOpacity(0.1), size: 180)),
-            Column(
+        child: FadeTransition(
+          opacity: _revealController,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.close, color: IbeereDesignTokens.textPrimary),
-                        onPressed: () => Navigator.pop(context),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context);
+                      },
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                      },
+                      icon: const Icon(
+                        Icons.share,
+                        color: Color(0xFF6C63FF),
+                        size: 20,
                       ),
-                      Text('Quiz Results', style: TextStyle(color: IbeereDesignTokens.textPrimary, fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(width: 48),
+                      label: const Text(
+                        'Share',
+                        style: TextStyle(color: Color(0xFF6C63FF)),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 32),
+                ScaleTransition(
+                  scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                    CurvedAnimation(
+                      parent: _revealController,
+                      curve: Curves.elasticOut,
+                    ),
+                  ),
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isVictory
+                            ? [
+                                const Color(0xFF10B981),
+                                const Color(0xFF34D399),
+                              ]
+                            : [
+                                const Color(0xFFEF4444),
+                                const Color(0xFFF87171),
+                              ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: (isVictory
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444))
+                              .withOpacity(0.4),
+                          blurRadius: 30,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      isVictory ? Icons.emoji_events : Icons.sentiment_dissatisfied,
+                      size: 80,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Text(
+                  isVictory ? 'Victory!' : 'Good Try!',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isVictory
+                      ? 'Congratulations on winning!'
+                      : 'Keep practicing to improve',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.1),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      _ResultStat(
+                        label: 'Score',
+                        value: '$score',
+                        icon: Icons.star,
+                        color: const Color(0xFFFFB800),
+                      ),
+                      const SizedBox(height: 16),
+                      _ResultStat(
+                        label: 'Accuracy',
+                        value: '$accuracy%',
+                        icon: Icons.track_changes,
+                        color: const Color(0xFF6C63FF),
+                      ),
+                      const SizedBox(height: 16),
+                      _ResultStat(
+                        label: 'Correct Answers',
+                        value: '$correctAnswers/$totalQuestions',
+                        icon: Icons.check_circle,
+                        color: const Color(0xFF10B981),
+                      ),
+                      const SizedBox(height: 16),
+                      _ResultStat(
+                        label: 'Coins Earned',
+                        value: '+$coinsEarned',
+                        icon: Icons.monetization_on,
+                        color: const Color(0xFFFFB800),
+                      ),
                     ],
                   ),
                 ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 120,
-                          height: 120,
-                          decoration: BoxDecoration(
-                            color: isWinner ? IbeereDesignTokens.accentGreen : IbeereDesignTokens.primaryRed,
-                            shape: BoxShape.circle,
-                            boxShadow: [BoxShadow(color: (isWinner ? IbeereDesignTokens.accentGreen : IbeereDesignTokens.primaryRed).withOpacity(0.3), blurRadius: 20, offset: Offset(0, 10))],
-                          ),
-                          child: Icon(
-                            isWinner ? Icons.emoji_events : Icons.sentiment_dissatisfied,
-                            size: 60,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        Text(
-                          isWinner ? 'Congratulations!' : 'Better Luck Next Time!',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: IbeereDesignTokens.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          isWinner ? 'You Won the Quiz!' : 'You Lost the Quiz',
-                          style: TextStyle(fontSize: 16, color: IbeereDesignTokens.textSecondary),
-                        ),
-                        const SizedBox(height: 32),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildScoreCard('Your Score', userScore, IbeereDesignTokens.primaryPurple, true),
-                            const SizedBox(width: 16),
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: IbeereDesignTokens.accentYellow.withOpacity(0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text('VS', style: TextStyle(color: IbeereDesignTokens.accentYellow, fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 56,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            Navigator.pushNamed(context, '/reviewAnswers');
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF6C63FF),
+                            side: const BorderSide(color: Color(0xFF6C63FF)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            const SizedBox(width: 16),
-                            _buildScoreCard('Opponent', opponentScore, IbeereDesignTokens.primaryPink, false),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        Container(
-                          padding: const EdgeInsets.all(24),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 4))],
                           ),
-                          child: Column(
-                            children: [
-                              Text('Performance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: IbeereDesignTokens.textPrimary)),
-                              const SizedBox(height: 20),
-                              _buildStatRow(Icons.check_circle, 'Correct Answers', '$correctAnswers/$totalQuestions', IbeereDesignTokens.accentGreen),
-                              const SizedBox(height: 16),
-                              _buildStatRow(Icons.timeline, 'Accuracy', accuracy, IbeereDesignTokens.primaryPurple),
-                              const SizedBox(height: 16),
-                              _buildStatRow(Icons.stars, 'Coins Earned', '+$coinsEarned', IbeereDesignTokens.accentYellow),
-                            ],
+                          child: const Text(
+                            'Review',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () => Navigator.pushNamed(context, '/review-quiz'),
-                                icon: Icon(Icons.replay, size: 20),
-                                label: Text('Review'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: IbeereDesignTokens.primaryPurple,
-                                  side: BorderSide(color: IbeereDesignTokens.primaryPurple, width: 2),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                ),
-                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            HapticFeedback.mediumImpact();
+                            Navigator.pushReplacementNamed(context, '/home');
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF6C63FF),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {},
-                                icon: Icon(Icons.share, size: 20),
-                                label: Text('Share'),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: IbeereDesignTokens.primaryPurple,
-                                  side: BorderSide(color: IbeereDesignTokens.primaryPurple, width: 2),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                ),
-                              ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Home',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 12),
-                        IbeereButton(
-                          text: 'Play Again',
-                          onPressed: () => Navigator.pop(context),
-                          icon: Icons.refresh,
-                        ),
-                      ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      HapticFeedback.mediumImpact();
+                    },
+                    icon: const Icon(Icons.replay),
+                    label: const Text(
+                      'Play Again',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                     ),
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildScoreCard(String label, int score, Color color, bool isUser) {
-    return Container(
-      width: 140,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3), width: 2),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.person, color: color, size: 28),
           ),
-          const SizedBox(height: 12),
-          Text(label, style: TextStyle(color: IbeereDesignTokens.textSecondary, fontSize: 12)),
-          const SizedBox(height: 4),
-          Text('$score', style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold)),
-        ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildStatRow(IconData icon, String label, String value, Color color) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, color: color, size: 20),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Text(label, style: TextStyle(color: IbeereDesignTokens.textSecondary, fontSize: 14)),
-        ),
-        Text(value, style: TextStyle(color: IbeereDesignTokens.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
-      ],
     );
   }
 }
 
-class _DecorativeCircle extends StatelessWidget {
+class _ResultStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
   final Color color;
-  final double size;
-  const _DecorativeCircle({required this.color, required this.size});
+
+  const _ResultStat({
+    required this.label,
+    required this.value,
+    required this.icon,
+    required this.color,
+  });
+
   @override
-  Widget build(BuildContext context) => Container(width: size, height: size, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.7),
+              fontSize: 16,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -1,163 +1,499 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/core/theme/ibeere_tokens.dart';
+import 'package:flutter/services.dart';
 
 class HomeQuizFeedScreen extends StatefulWidget {
   const HomeQuizFeedScreen({super.key});
-
-  static const String routeName = '/home-quiz-feed';
 
   @override
   State<HomeQuizFeedScreen> createState() => _HomeQuizFeedScreenState();
 }
 
-class _HomeQuizFeedScreenState extends State<HomeQuizFeedScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _HomeQuizFeedScreenState extends State<HomeQuizFeedScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  bool _isLoading = false;
+  String _errorMessage = '';
+  int _selectedTab = 0;
+
+  final List<_QuizCard> _quizzes = [
+    _QuizCard(
+      title: 'Science Challenge',
+      category: 'Science',
+      questions: 20,
+      difficulty: 'Medium',
+      participants: '2.5K',
+      color: const Color(0xFF6C63FF),
+      icon: Icons.science,
+    ),
+    _QuizCard(
+      title: 'History Trivia',
+      category: 'History',
+      questions: 15,
+      difficulty: 'Easy',
+      participants: '1.8K',
+      color: const Color(0xFFEC4899),
+      icon: Icons.history_edu,
+    ),
+    _QuizCard(
+      title: 'Math Masters',
+      category: 'Math',
+      questions: 25,
+      difficulty: 'Hard',
+      participants: '3.2K',
+      color: const Color(0xFF10B981),
+      icon: Icons.calculate,
+    ),
+    _QuizCard(
+      title: 'Geography Quiz',
+      category: 'Geography',
+      questions: 18,
+      difficulty: 'Medium',
+      participants: '1.5K',
+      color: const Color(0xFFFFB800),
+      icon: Icons.public,
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _revealController.forward();
+    });
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _revealController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: IbeereDesignTokens.backgroundLight,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text('Quiz Feed', style: TextStyle(color: IbeereDesignTokens.textPrimary, fontSize: 20, fontWeight: FontWeight.bold)),
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: IbeereDesignTokens.primaryPurple,
-          unselectedLabelColor: IbeereDesignTokens.textSecondary,
-          indicatorColor: IbeereDesignTokens.primaryPurple,
-          tabs: const [
-            Tab(text: 'Quiz Zone'),
-            Tab(text: 'Guess the Word'),
-            Tab(text: 'Audio Quiz'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildQuizZone(),
-          Center(child: Text('Guess the Word', style: TextStyle(color: IbeereDesignTokens.textSecondary))),
-          Center(child: Text('Audio Quiz', style: TextStyle(color: IbeereDesignTokens.textSecondary))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuizZone() {
-    final questions = [
-      {'category': 'Science', 'question': 'What is the powerhouse of the cell?', 'color': IbeereDesignTokens.primaryPurple},
-      {'category': 'History', 'question': 'Who was the first president?', 'color': IbeereDesignTokens.primaryPink},
-      {'category': 'Math', 'question': 'What is the square root of 144?', 'color': IbeereDesignTokens.accentCyan},
-      {'category': 'Geography', 'question': 'What is the capital of France?', 'color': IbeereDesignTokens.accentGreen},
-    ];
-
-    return Stack(
-      children: [
-        Positioned(top: 40, right: 20, child: _DecorativeCircle(color: Color(0xFFEC4899).withOpacity(0.1), size: 80)),
-        Positioned(bottom: 100, left: -20, child: _DecorativeCircle(color: Color(0xFF10B981).withOpacity(0.1), size: 100)),
-        ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: questions.length,
-          itemBuilder: (context, index) {
-            final q = questions[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: Offset(0, 2))],
-              ),
-              child: Stack(
-                children: [
-                  Positioned(top: -10, right: 10, child: _DecorativeTriangle(color: (q['color'] as Color).withOpacity(0.1), size: 40)),
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border(left: BorderSide(color: q['color'] as Color, width: 4)),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: const Color(0xFF1A1A2E),
+      body: SafeArea(
+        child: FadeTransition(
+          opacity: _revealController,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: (q['color'] as Color).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            q['category'] as String,
-                            style: TextStyle(color: q['color'] as Color, fontSize: 12, fontWeight: FontWeight.w600),
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Hello, John! 👋',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Ready for a challenge?',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          q['question'] as String,
-                          style: TextStyle(color: IbeereDesignTokens.textPrimary, fontSize: 16, fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(height: 12),
                         Row(
                           children: [
-                            Icon(Icons.timer, size: 16, color: IbeereDesignTokens.textSecondary),
-                            const SizedBox(width: 4),
-                            Text('30s', style: TextStyle(color: IbeereDesignTokens.textSecondary, fontSize: 12)),
-                            const SizedBox(width: 16),
-                            Icon(Icons.help_outline, size: 16, color: IbeereDesignTokens.textSecondary),
-                            const SizedBox(width: 4),
-                            Text('4 options', style: TextStyle(color: IbeereDesignTokens.textSecondary, fontSize: 12)),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.search,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pushNamed(context, '/search');
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.notifications,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.pushNamed(context, '/notification');
+                              },
+                            ),
                           ],
                         ),
                       ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF6C63FF), Color(0xFFA78BFA)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Daily Challenge',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Complete today\'s quiz and earn 200 coins!',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.emoji_events,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            );
-          },
+              Container(
+                height: 50,
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    _TabButton(
+                      label: 'All',
+                      isSelected: _selectedTab == 0,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedTab = 0);
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _TabButton(
+                      label: 'Popular',
+                      isSelected: _selectedTab == 1,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedTab = 1);
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _TabButton(
+                      label: 'New',
+                      isSelected: _selectedTab == 2,
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() => _selectedTab = 2);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  itemCount: _quizzes.length,
+                  itemBuilder: (context, index) {
+                    return _QuizCardWidget(
+                      quiz: _quizzes[index],
+                      onTap: () {
+                        HapticFeedback.mediumImpact();
+                        Navigator.pushNamed(context, '/quiz');
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
+      bottomNavigationBar: _BottomNavBar(),
     );
   }
 }
 
-class _DecorativeCircle extends StatelessWidget {
+class _QuizCard {
+  final String title;
+  final String category;
+  final int questions;
+  final String difficulty;
+  final String participants;
   final Color color;
-  final double size;
-  const _DecorativeCircle({required this.color, required this.size});
-  @override
-  Widget build(BuildContext context) => Container(width: size, height: size, decoration: BoxDecoration(color: color, shape: BoxShape.circle));
+  final IconData icon;
+
+  _QuizCard({
+    required this.title,
+    required this.category,
+    required this.questions,
+    required this.difficulty,
+    required this.participants,
+    required this.color,
+    required this.icon,
+  });
 }
 
-class _DecorativeTriangle extends StatelessWidget {
-  final Color color;
-  final double size;
-  const _DecorativeTriangle({required this.color, required this.size});
-  @override
-  Widget build(BuildContext context) => CustomPaint(size: Size(size, size), painter: _TrianglePainter(color));
-}
+class _TabButton extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-class _TrianglePainter extends CustomPainter {
-  final Color color;
-  _TrianglePainter(this.color);
+  const _TabButton({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color..style = PaintingStyle.fill;
-    final path = Path()..moveTo(size.width / 2, 0)..lineTo(size.width, size.height)..lineTo(0, size.height)..close();
-    canvas.drawPath(path, paint);
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFF6C63FF)
+              : Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white.withOpacity(0.7),
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+      ),
+    );
   }
+}
+
+class _QuizCardWidget extends StatelessWidget {
+  final _QuizCard quiz;
+  final VoidCallback onTap;
+
+  const _QuizCardWidget({
+    required this.quiz,
+    required this.onTap,
+  });
+
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: quiz.color.withOpacity(0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: quiz.color.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      quiz.icon,
+                      color: quiz.color,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          quiz.title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          quiz.category,
+                          style: TextStyle(
+                            color: quiz.color,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: quiz.color.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      quiz.difficulty,
+                      style: TextStyle(
+                        color: quiz.color,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(
+                    Icons.help_outline,
+                    size: 16,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${quiz.questions} Questions',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Icon(
+                    Icons.people_outline,
+                    size: 16,
+                    color: Colors.white.withOpacity(0.7),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${quiz.participants} played',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomNavBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 70,
+      decoration: BoxDecoration(
+        color: const Color(0xFF252542),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _NavItem(icon: Icons.home, label: 'Home', isActive: true),
+          _NavItem(icon: Icons.explore, label: 'Explore', isActive: false),
+          _NavItem(icon: Icons.emoji_events, label: 'Compete', isActive: false),
+          _NavItem(icon: Icons.person, label: 'Profile', isActive: false),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          color: isActive ? const Color(0xFF6C63FF) : Colors.white.withOpacity(0.5),
+          size: 24,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            color: isActive ? const Color(0xFF6C63FF) : Colors.white.withOpacity(0.5),
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
 }

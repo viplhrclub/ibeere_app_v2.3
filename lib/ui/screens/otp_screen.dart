@@ -1,221 +1,264 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/core/theme/design_tokens.dart';
-import 'package:flutterquiz/ui/widgets/ibeere_buttons.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 
 class OtpScreen extends StatefulWidget {
-
-  const OtpScreen({required this.email, super.key});
   final String email;
+
+  const OtpScreen({
+    super.key,
+    required this.email,
+  });
 
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
-  late List<TextEditingController> _otpControllers;
+class _OtpScreenState extends State<OtpScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _revealController;
+  final List<TextEditingController> _otpControllers =
+      List.generate(6, (index) => TextEditingController());
+  final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
-  int _resendTimer = 0;
+  String _errorMessage = '';
+  int _resendCountdown = 60;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _otpControllers = List.generate(6, (index) => TextEditingController());
+    _revealController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (mounted) _revealController.forward();
+    });
+
     _startResendTimer();
+  }
+
+  void _startResendTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_resendCountdown > 0) {
+        setState(() => _resendCountdown--);
+      } else {
+        _timer?.cancel();
+      }
+    });
   }
 
   @override
   void dispose() {
-    for (final controller in _otpControllers) {
+    for (var controller in _otpControllers) {
       controller.dispose();
     }
+    for (var node in _focusNodes) {
+      node.dispose();
+    }
+    _timer?.cancel();
+    _revealController.dispose();
     super.dispose();
   }
 
-  void _startResendTimer() {
-    setState(() => _resendTimer = 30);
-    Future.doWhile(() async {
-      await Future<void>.delayed(const Duration(seconds: 1));
+  void _handleVerify() {
+    HapticFeedback.mediumImpact();
+    final otp = _otpControllers.map((c) => c.text).join();
+    if (otp.length != 6) {
+      setState(() {
+        _errorMessage = 'Please enter complete OTP';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
-        setState(() => _resendTimer--);
+        HapticFeedback.heavyImpact();
+        Navigator.pushReplacementNamed(context, '/home');
       }
-      return _resendTimer > 0;
     });
   }
 
-  void _verifyOtp() {
-    final otp = _otpControllers.map((c) => c.text).join();
-    if (otp.length == 6) {
-      setState(() => _isLoading = true);
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() => _isLoading = false);
-        // Navigate to success or next screen
+  void _handleResend() {
+    if (_resendCountdown == 0) {
+      HapticFeedback.mediumImpact();
+      setState(() {
+        _resendCountdown = 60;
       });
+      _startResendTimer();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DesignTokens.background,
-      appBar: AppBar(
-        backgroundColor: DesignTokens.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: DesignTokens.primary),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      backgroundColor: const Color(0xFF1A1A2E),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Verify Email',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF007AFF),
+          padding: const EdgeInsets.all(24.0),
+          child: FadeTransition(
+            opacity: _revealController,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Enter the code sent to ${_hiddenEmail(widget.email)}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF6B7280),
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // OTP Input Fields
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(
-                  6,
-                  (index) => _OtpField(
-                    controller: _otpControllers[index],
-                    onChanged: (value) {
-                      if (value.isNotEmpty && index < 5) {
-                        FocusScope.of(context).nextFocus();
-                      } else if (value.isEmpty && index > 0) {
-                        FocusScope.of(context).previousFocus();
-                      }
-                    },
+                const SizedBox(height: 32),
+                const Text(
+                  'Verify Email',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ),
-              const SizedBox(height: DesignTokens.spaceXxl),
-
-              // Verify Button
-              IbeerePrimaryButton(
-                label: 'Verify',
-                isFullWidth: true,
-                isLoading: _isLoading,
-                onPressed: _verifyOtp,
-              ),
-              const SizedBox(height: DesignTokens.spaceXl),
-
-              // Resend Code
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      "Didn't receive the code?",
-                      style: TextStyle(
-                        fontSize: DesignTokens.fontSizeBase,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: DesignTokens.spaceSm),
-                    if (_resendTimer > 0)
-                      Text(
-                        'Resend in ${_resendTimer}s',
-                        style: TextStyle(
-                          fontSize: DesignTokens.fontSizeBase,
-                          color: DesignTokens.primary,
-                          fontWeight: DesignTokens.fontWeightSemibold,
+                const SizedBox(height: 8),
+                Text(
+                  'We sent a code to ${widget.email}',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 48),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(6, (index) {
+                    return SizedBox(
+                      width: 50,
+                      child: TextField(
+                        controller: _otpControllers[index],
+                        focusNode: _focusNodes[index],
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                      )
-                    else
-                      GestureDetector(
-                        onTap: _startResendTimer,
-                        child: Text(
-                          'Resend Code',
-                          style: TextStyle(
-                            fontSize: DesignTokens.fontSizeBase,
-                            color: DesignTokens.primary,
-                            fontWeight: DesignTokens.fontWeightBold,
-                            decoration: TextDecoration.underline,
+                        decoration: InputDecoration(
+                          counterText: '',
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.1),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.white.withOpacity(0.1),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF6C63FF),
+                              width: 2,
+                            ),
                           ),
                         ),
+                        onChanged: (value) {
+                          HapticFeedback.lightImpact();
+                          if (value.isNotEmpty && index < 5) {
+                            _focusNodes[index + 1].requestFocus();
+                          } else if (value.isEmpty && index > 0) {
+                            _focusNodes[index - 1].requestFocus();
+                          }
+                        },
                       ),
+                    );
+                  }),
+                ),
+                if (_errorMessage.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Text(
+                      _errorMessage,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Didn't receive code? ",
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: _resendCountdown == 0 ? _handleResend : null,
+                      child: Text(
+                        _resendCountdown > 0
+                            ? 'Resend in ${_resendCountdown}s'
+                            : 'Resend',
+                        style: TextStyle(
+                          color: _resendCountdown == 0
+                              ? const Color(0xFF6C63FF)
+                              : Colors.white.withOpacity(0.5),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _hiddenEmail(String email) {
-    final parts = email.split('@');
-    final localPart = parts[0];
-    final domain = parts[1];
-    final hidden = '${localPart[0]}${'*' * (localPart.length - 2)}${localPart[localPart.length - 1]}';
-    return '$hidden@$domain';
-  }
-}
-
-class _OtpField extends StatelessWidget {
-
-  const _OtpField({
-    required this.controller,
-    required this.onChanged,
-  });
-  final TextEditingController controller;
-  final void Function(String) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 50,
-      height: 60,
-      child: TextField(
-        controller: controller,
-        textAlign: TextAlign.center,
-        keyboardType: TextInputType.number,
-        maxLength: 1,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          counterText: '',
-          fillColor: const Color(0xFFF9FAFB),
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(
-              color: Color(0xFF007AFF),
-              width: 2,
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleVerify,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF6C63FF),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation(
+                                Colors.white,
+                              ),
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Verify',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-        ),
       ),
     );
   }
 }
-
