@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutterquiz/core/theme/design_tokens.dart';
+import 'dart:async';
 
-/// Ibeere Splash Screen
-/// 
-/// Initial landing screen with logo and branding
-/// Displays animated splash with app name and tagline
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -14,9 +10,9 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+  late AnimationController _controller;
   late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -26,98 +22,145 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _setupAnimations() {
-    _animationController = AnimationController(
+    _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+      ),
     );
 
-    _slideAnimation = Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero)
-        .animate(
-          CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
-        );
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.2, 0.8, curve: Curves.elasticOut),
+      ),
+    );
 
-    _animationController.forward();
+    _controller.forward();
   }
 
   void _navigateToNext() {
-    Future.delayed(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        // Navigate to home or onboarding screen
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed('/onboarding');
       }
     });
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: DesignTokens.primary,
-      body: Center(
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Logo/Icon Container
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.quiz_rounded,
-                      size: 50,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                
-                // App Name
-                const Text(
-                  'Ibeere',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Tagline
-                Text(
-                  'Learn & Compete',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white.withValues(alpha: 0.7),
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF7C3AED),
+              Color(0xFF5B21B6),
+              Color(0xFF4C1D95),
+            ],
           ),
+        ),
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _fadeAnimation.value,
+              child: Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(flex: 2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'ibeere',
+                          style: TextStyle(
+                            fontSize: 56,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: 2,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.25),
+                                offset: const Offset(0, 4),
+                                blurRadius: 8,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.3),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Text(
+                            'GAMES',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Test Your Knowledge',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.white.withOpacity(0.8),
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const Spacer(flex: 3),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Colors.white.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 }
-
-
