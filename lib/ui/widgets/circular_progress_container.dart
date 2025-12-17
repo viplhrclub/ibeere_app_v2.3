@@ -53,7 +53,7 @@ class _CircularProgressContainerState extends State<CircularProgressContainer>
         child: RepaintBoundary(
           child: AnimatedBuilder(
             animation: _rotationController,
-            builder: (_, _) => Transform.rotate(
+            builder: (context, child) => Transform.rotate(
               angle: (_rotationController.value * 6) * pi2,
               child: SvgPicture.asset(
                 loader,

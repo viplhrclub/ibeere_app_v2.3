@@ -425,275 +425,36 @@ class _SignUpEmailV2State extends State<SignUpEmailV2> {
     );
   }
 
-  Widget _buildLogoSection() {
-    return Center(
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 200,
-            height: 120,
-            decoration: BoxDecoration(
-              color: Color(0xFFE8E8F0).withOpacity(0.5),
-              borderRadius: BorderRadius.circular(60),
-            ),
-          ),
-          Positioned(
-            top: -15,
-            left: 20,
-            child: Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                color: Color(0xFF6366F1),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 5,
-            right: 30,
-            child: Icon(
-              Icons.play_arrow_rounded,
-              color: Color(0xFF1F2937),
-              size: 16,
-            ),
-          ),
-          Positioned(
-            bottom: -8,
-            right: 25,
-            child: Icon(
-              Icons.circle,
-              color: Color(0xFF9333EA),
-              size: 10,
-            ),
-          ),
-          Positioned(
-            top: 8,
-            right: 50,
-            child: Transform.rotate(
-              angle: 0.6,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Color(0xFF1F2937), width: 1.5),
-                ),
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              Text(
-                'ibeere',
-                style: TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF6366F1),
-                  letterSpacing: -1,
-                  height: 1,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 16,
-                    height: 2,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF1F2937),
-                      borderRadius: BorderRadius.circular(1),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'Games',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1F2937),
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 16,
-                    height: 2,
-                    decoration: BoxDecoration(
-                      color: Color(0xFF1F2937),
-                      borderRadius: BorderRadius.circular(1),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData icon,
-    bool isPassword = false,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    return Container(
-      height: 56,
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFFE5E7EB), width: 1),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Color(0xFF9CA3AF), size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              obscureText: isPassword && _obscurePassword,
-              keyboardType: keyboardType,
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-              ),
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFFBBBEC4),
-                  fontWeight: FontWeight.w400,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-              ),
-            ),
-          ),
-          if (isPassword)
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
-              icon: Icon(
-                _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                color: Color(0xFF9CA3AF),
-                size: 20,
-              ),
-              padding: EdgeInsets.zero,
-              constraints: BoxConstraints(),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSocialButton({required bool isGoogle}) {
-    return Container(
-      width: 60,
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: Color(0xFFE5E7EB), width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Icon(
-        isGoogle ? Icons.g_mobiledata_rounded : Icons.phone_iphone_rounded,
-        color: isGoogle ? Color(0xFF4285F4) : Color(0xFF6B7280),
-        size: isGoogle ? 36 : 26,
-      ),
-    );
-  }
-
-  Widget _buildFloatingButton() {
-    return Container(
-      width: 68,
-      height: 68,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFFEF4444),
-            Color(0xFFDC2626),
-          ],
-        ),
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xFFEF4444).withOpacity(0.4),
-            blurRadius: 20,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => Navigator.pushNamed(context, '/profile-avatar'),
-          borderRadius: BorderRadius.circular(34),
-          child: Center(
-            child: Icon(
-              Icons.play_arrow_rounded,
-              color: Colors.white,
-              size: 32,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildCircle(Color color, double size, {bool outlined = false}) {
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: outlined ? Colors.transparent : color.withOpacity(0.5),
         shape: BoxShape.circle,
-        border: outlined ? Border.all(color: color.withOpacity(0.4), width: 2) : null,
+        color: outlined ? Colors.transparent : color.withValues(alpha: 0.4),
+        border: outlined ? Border.all(color: color.withValues(alpha: 0.4), width: 2) : null,
       ),
     );
   }
 
   Widget _buildDiamond(Color color, double size) {
     return Transform.rotate(
-      angle: 0.785398,
+      angle: 0.785398, // 45 degrees in radians
       child: Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(3),
+          color: color.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(2),
         ),
       ),
     );
   }
 
   Widget _buildTriangle(Color color, double size) {
-    return Transform.rotate(
-      angle: -0.785398,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.4),
-        ),
-      ),
+    return CustomPaint(
+      size: Size(size, size),
+      painter: TrianglePainter(color.withValues(alpha: 0.4)),
     );
   }
 
@@ -702,12 +463,12 @@ class _SignUpEmailV2State extends State<SignUpEmailV2> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.3),
+        color: color.withValues(alpha: 0.3),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(height * 0.7),
-          topRight: Radius.circular(height * 0.3),
-          bottomLeft: Radius.circular(height * 0.4),
-          bottomRight: Radius.circular(height * 0.6),
+          topLeft: Radius.circular(width * 0.7),
+          topRight: Radius.circular(width * 0.3),
+          bottomLeft: Radius.circular(width * 0.4),
+          bottomRight: Radius.circular(width * 0.6),
         ),
       ),
     );
@@ -718,5 +479,31 @@ class _SignUpEmailV2State extends State<SignUpEmailV2> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+}
+
+class TrianglePainter extends CustomPainter {
+  final Color color;
+
+  TrianglePainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    path.moveTo(size.width / 2, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return false;
   }
 }

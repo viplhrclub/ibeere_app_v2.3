@@ -129,13 +129,12 @@ class ReferAndEarnScreen extends StatelessWidget {
 
                       /// your referral code
                       DottedBorder(
-                        options: RoundedRectDottedBorderOptions(
-                          strokeWidth: 3,
-                          padding: EdgeInsets.zero,
-                          dashPattern: const [6, 4],
-                          color: context.surfaceColor.withValues(alpha: .5),
-                          radius: const Radius.circular(8),
-                        ),
+                        strokeWidth: 3,
+                        padding: EdgeInsets.zero,
+                        dashPattern: const [6, 4],
+                        color: context.surfaceColor.withValues(alpha: .5),
+                        radius: const Radius.circular(8),
+                        borderType: BorderType.RRect,
                         child: Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),

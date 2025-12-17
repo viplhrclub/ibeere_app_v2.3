@@ -370,7 +370,7 @@ final class ProfileTabScreenState extends State<ProfileTabScreen>
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: UiUtils.listTileGap),
+      separatorBuilder: (context, index) => const SizedBox(height: UiUtils.listTileGap),
       itemBuilder: (_, i) => _buildListViewItem(items[i]),
     );
   }

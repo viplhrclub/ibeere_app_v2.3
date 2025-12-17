@@ -193,7 +193,7 @@ class _BookmarkScreenState extends State<BookmarkScreen>
                               height: context.width * .5,
                               alignment: Alignment.center,
                               child: CachedNetworkImage(
-                                placeholder: (_, _) => const Center(
+                                placeholder: (context, url) => const Center(
                                   child: CircularProgressContainer(),
                                 ),
                                 imageUrl: imageUrl,

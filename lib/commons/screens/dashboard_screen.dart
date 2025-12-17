@@ -285,7 +285,7 @@ class DashboardScreenState extends State<DashboardScreen> {
       ),
       child: ValueListenableBuilder(
         valueListenable: _currTabIndex,
-        builder: (_, currentIndex, _) {
+        builder: (context, currentIndex, child) {
           return Stack(
             children: [
               PopScope(

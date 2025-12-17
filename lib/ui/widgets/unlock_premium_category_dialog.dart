@@ -43,13 +43,13 @@ Future<bool?> showUnlockPremiumCategoryDialog(
   return showGeneralDialog<bool?>(
     context: context,
     transitionDuration: const Duration(milliseconds: 300),
-    pageBuilder: (dialogCtx, _, _) => _UnlockPremiumAlertDialog(
+    pageBuilder: (dialogCtx, animation, secondaryAnimation) => _UnlockPremiumAlertDialog(
       categoryId: categoryId,
       categoryName: categoryName,
       requiredCoins: requiredCoins,
       categoryCubit: categoryCubit,
     ),
-    transitionBuilder: (_, animation, _, child) {
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curve = CurvedAnimation(
         parent: animation,
         curve: Curves.easeOutBack,

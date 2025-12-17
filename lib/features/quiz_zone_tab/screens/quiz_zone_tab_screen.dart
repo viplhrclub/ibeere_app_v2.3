@@ -124,7 +124,7 @@ final class QuizZoneTabScreenState extends State<QuizZoneTabScreen>
     super.build(context);
     return BlocListener<QuizLanguageCubit, QuizLanguageState>(
       listenWhen: (prev, curr) => prev.languageId != curr.languageId,
-      listener: (_, _) => _fetchCategories(),
+      listener: (context, state) => _fetchCategories(),
       child: Scaffold(
         appBar: QAppBar(
           title: Text(context.tr('quizZone')!),

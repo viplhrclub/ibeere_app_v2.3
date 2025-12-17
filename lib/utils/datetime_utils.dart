@@ -25,7 +25,7 @@ class DateTimeUtils {
       gmt = '$hh:$mm';
     }
 
-    return (gmt: gmt, localTimezone: localTimezone.identifier);
+    return (gmt: gmt, localTimezone: localTimezone);
   }
 }
 
