@@ -36,52 +36,6 @@ import 'package:flutterquiz/ui/screens/splash_screen.dart';
 import 'package:flutterquiz/ui/screens/splash_screen_variant_2.dart';
 import 'package:flutterquiz/ui/screens/splash_screen_variant_3.dart';
 import 'package:flutterquiz/ui/screens/statistics_screen.dart';
-import 'package:flutterquiz/ui/screens/true_splash_screen_v2.dart';
-import 'package:flutterquiz/ui/screens/onboarding_ultimate_challenge_v2.dart';
-import 'package:flutterquiz/ui/screens/onboarding_get_ready_v2.dart';
-import 'package:flutterquiz/ui/screens/language_selection_flags_v2.dart';
-import 'package:flutterquiz/ui/screens/sign_in_email_v2.dart';
-import 'package:flutterquiz/ui/screens/sign_up_email_v2.dart';
-import 'package:flutterquiz/ui/screens/profile_avatar_selection_grid_v2.dart';
-import 'package:flutterquiz/ui/screens/profile_name_input_v2.dart';
-import 'package:flutterquiz/ui/screens/profile_statistics_v2.dart';
-import 'package:flutterquiz/ui/screens/profile_edit_v2.dart';
-import 'package:flutterquiz/ui/screens/coin_store_packages_v2.dart';
-import 'package:flutterquiz/ui/screens/payment_method_selection_v2.dart';
-import 'package:flutterquiz/ui/screens/payment_success_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_mode_selection_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_countdown_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_room_create_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_room_join_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_quiz_in_progress_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_completion_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_quick_chat_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_pin_entry_v2.dart';
-import 'package:flutterquiz/ui/screens/battle_match_finding_v2.dart';
-import 'package:flutterquiz/ui/screens/mini_games_grid_v2.dart';
-import 'package:flutterquiz/ui/screens/game_tic_tac_toe_v2.dart';
-import 'package:flutterquiz/ui/screens/game_number_puzzle_v2.dart';
-import 'package:flutterquiz/ui/screens/game_memory_cards_v2.dart';
-import 'package:flutterquiz/ui/screens/game_guess_word_v2.dart';
-import 'package:flutterquiz/ui/screens/quiz_playing_screen_v2.dart';
-import 'package:flutterquiz/ui/screens/quiz_victory_results_v2.dart';
-import 'package:flutterquiz/ui/screens/quiz_defeat_results_v2.dart';
-import 'package:flutterquiz/ui/screens/quiz_review_answers_v2.dart';
-import 'package:flutterquiz/ui/screens/contest_entry_v2.dart';
-import 'package:flutterquiz/ui/screens/leaderboard_podium_v2.dart';
-import 'package:flutterquiz/ui/screens/badges_collection_v2.dart';
-import 'package:flutterquiz/ui/screens/daily_rewards_v2.dart';
-import 'package:flutterquiz/ui/screens/rewards_leaderboard_v2.dart';
-import 'package:flutterquiz/ui/screens/settings_main_v2.dart';
-import 'package:flutterquiz/ui/screens/settings_sound_v2.dart';
-import 'package:flutterquiz/ui/screens/settings_language_v2.dart';
-import 'package:flutterquiz/ui/screens/notifications_list_v2.dart';
-import 'package:flutterquiz/ui/screens/friends_list_v2.dart';
-import 'package:flutterquiz/ui/screens/friend_chat_v2.dart';
-import 'package:flutterquiz/ui/screens/scratch_card_v2.dart';
-import 'package:flutterquiz/ui/screens/category_selection_tabs_v2.dart';
-import 'package:flutterquiz/ui/screens/home_quiz_feed_v2.dart';
-import 'package:flutterquiz/ui/screens/referral_earn_v2.dart';
 
 final globalNavigator = GlobalKey<NavigatorState>();
 final BuildContext globalCtx = globalNavigator.currentContext!;
@@ -187,54 +141,6 @@ class Routes {
   static const subscription = '/subscription';
   static const referral = '/referral';
 
-  // V2 Routes
-  static const trueSplashV2 = '/true-splash-v2';
-  static const onboardingUltimateV2 = '/onboarding-ultimate';
-  static const onboardingGetReadyV2 = '/onboarding-get-ready';
-  static const languageSelectionFlagsV2 = '/language-selection';
-  static const signInEmailV2 = '/sign-in-email';
-  static const signUpEmailV2 = '/sign-up-email';
-  static const profileAvatarSelectionV2 = '/profile-avatar-selection';
-  static const profileNameInputV2 = '/profile-name-input';
-  static const profileStatisticsV2 = '/profile-statistics';
-  static const profileEditV2 = '/profile-edit';
-  static const coinStorePackagesV2 = '/coin-store-packages';
-  static const paymentMethodSelectionV2 = '/payment-method-selection';
-  static const paymentSuccessV2 = '/payment-success';
-  static const battleModeSelectionV2 = '/battle-mode-selection';
-  static const battleCountdownV2 = '/battle-countdown';
-  static const battleRoomCreateV2 = '/battle-room-created';
-  static const battleRoomJoinV2 = '/battle-room-join';
-  static const battleQuizInProgressV2 = '/battle-quiz-in-progress';
-  static const battleCompletionV2 = '/battle-completion';
-  static const battleQuickChatV2 = '/battle-quick-chat';
-  static const battlePinEntryV2 = '/battle-pin-entry';
-  static const battleMatchFindingV2 = '/battle-match-finding';
-  static const miniGamesGridV2 = '/mini-games';
-  static const gameTicTacToeV2 = '/game-tic-tac-toe';
-  static const gameNumberPuzzleV2 = '/game-number-puzzle';
-  static const gameMemoryCardsV2 = '/game-memory-cards';
-  static const gameGuessWordV2 = '/game-guess-word';
-  static const quizPlayingV2 = '/quiz-playing';
-  static const quizVictoryV2 = '/quiz-victory';
-  static const quizDefeatV2 = '/quiz-defeat';
-  static const quizReviewV2 = '/quiz-review';
-  static const contestEntryV2 = '/contest-entry';
-  static const leaderboardPodiumV2 = '/leaderboard-podium';
-  static const badgesCollectionV2 = '/badges-collection';
-  static const dailyRewardsV2 = '/daily-rewards';
-  static const rewardsLeaderboardV2 = '/rewards-leaderboard';
-  static const settingsMainV2 = '/settings-main';
-  static const settingsSoundV2 = '/sound-settings';
-  static const settingsLanguageV2 = '/language-settings';
-  static const notificationsListV2 = '/notifications-list';
-  static const friendsListV2 = '/friends-list';
-  static const friendChatV2 = '/friend-chat';
-  static const scratchCardV2 = '/scratch-card';
-  static const categorySelectionTabsV2 = '/category-tabs';
-  static const homeQuizFeedV2 = '/home-quiz-feed';
-  static const referralEarnV2 = '/referral-earn';
-
   static String currentRoute = splash;
 
   static Route<dynamic>? onGenerateRouted(RouteSettings rs) {
@@ -321,98 +227,6 @@ class Routes {
         return CupertinoPageRoute(builder: (_) => const HomeScreenVariant3());
       case homeVariant4:
         return CupertinoPageRoute(builder: (_) => const HomeScreenVariant4());
-      case trueSplashV2:
-        return CupertinoPageRoute(builder: (_) => const TrueSplashScreenV2());
-      case onboardingUltimateV2:
-        return CupertinoPageRoute(builder: (_) => const OnboardingUltimateChallengeV2());
-      case onboardingGetReadyV2:
-        return CupertinoPageRoute(builder: (_) => const OnboardingGetReadyV2());
-      case languageSelectionFlagsV2:
-        return CupertinoPageRoute(builder: (_) => const LanguageSelectionFlagsV2());
-      case signInEmailV2:
-        return CupertinoPageRoute(builder: (_) => const SignInEmailV2());
-      case signUpEmailV2:
-        return CupertinoPageRoute(builder: (_) => const SignUpEmailV2());
-      case profileAvatarSelectionV2:
-        return CupertinoPageRoute(builder: (_) => const ProfileAvatarSelectionGridV2());
-      case profileNameInputV2:
-        return CupertinoPageRoute(builder: (_) => const ProfileNameInputV2());
-      case profileStatisticsV2:
-        return CupertinoPageRoute(builder: (_) => const ProfileStatisticsV2());
-      case profileEditV2:
-        return CupertinoPageRoute(builder: (_) => const ProfileEditV2());
-      case coinStorePackagesV2:
-        return CupertinoPageRoute(builder: (_) => const CoinStorePackagesV2());
-      case paymentMethodSelectionV2:
-        return CupertinoPageRoute(builder: (_) => const PaymentMethodSelectionV2());
-      case paymentSuccessV2:
-        return CupertinoPageRoute(builder: (_) => const PaymentSuccessV2());
-      case battleModeSelectionV2:
-        return CupertinoPageRoute(builder: (_) => const BattleModeSelectionV2());
-      case battleCountdownV2:
-        return CupertinoPageRoute(builder: (_) => const BattleCountdownV2());
-      case battleRoomCreateV2:
-        return CupertinoPageRoute(builder: (_) => const BattleRoomCreateV2());
-      case battleRoomJoinV2:
-        return CupertinoPageRoute(builder: (_) => const BattleRoomJoinV2());
-      case battleQuizInProgressV2:
-        return CupertinoPageRoute(builder: (_) => const BattleQuizInProgressV2());
-      case battleCompletionV2:
-        return CupertinoPageRoute(builder: (_) => const BattleCompletionV2());
-      case battleQuickChatV2:
-        return CupertinoPageRoute(builder: (_) => const BattleQuickChatV2());
-      case battlePinEntryV2:
-        return CupertinoPageRoute(builder: (_) => const BattlePinEntryV2());
-      case battleMatchFindingV2:
-        return CupertinoPageRoute(builder: (_) => const BattleMatchFindingV2());
-      case miniGamesGridV2:
-        return CupertinoPageRoute(builder: (_) => const MiniGamesGridV2());
-      case gameTicTacToeV2:
-        return CupertinoPageRoute(builder: (_) => const GameTicTacToeV2());
-      case gameNumberPuzzleV2:
-        return CupertinoPageRoute(builder: (_) => const GameNumberPuzzleV2());
-      case gameMemoryCardsV2:
-        return CupertinoPageRoute(builder: (_) => const GameMemoryCardsV2());
-      case gameGuessWordV2:
-        return CupertinoPageRoute(builder: (_) => const GameGuessWordV2());
-      case quizPlayingV2:
-        return CupertinoPageRoute(builder: (_) => const QuizPlayingScreenV2());
-      case quizVictoryV2:
-        return CupertinoPageRoute(builder: (_) => const QuizVictoryResultsV2());
-      case quizDefeatV2:
-        return CupertinoPageRoute(builder: (_) => const QuizDefeatResultsV2());
-      case quizReviewV2:
-        return CupertinoPageRoute(builder: (_) => const QuizReviewAnswersV2());
-      case contestEntryV2:
-        return CupertinoPageRoute(builder: (_) => const ContestEntryV2());
-      case leaderboardPodiumV2:
-        return CupertinoPageRoute(builder: (_) => const LeaderboardPodiumV2());
-      case badgesCollectionV2:
-        return CupertinoPageRoute(builder: (_) => const BadgesCollectionV2());
-      case dailyRewardsV2:
-        return CupertinoPageRoute(builder: (_) => const DailyRewardsV2());
-      case rewardsLeaderboardV2:
-        return CupertinoPageRoute(builder: (_) => const RewardsLeaderboardV2());
-      case settingsMainV2:
-        return CupertinoPageRoute(builder: (_) => const SettingsMainV2());
-      case settingsSoundV2:
-        return CupertinoPageRoute(builder: (_) => const SettingsSoundV2());
-      case settingsLanguageV2:
-        return CupertinoPageRoute(builder: (_) => const SettingsLanguageV2());
-      case notificationsListV2:
-        return CupertinoPageRoute(builder: (_) => const NotificationsListV2());
-      case friendsListV2:
-        return CupertinoPageRoute(builder: (_) => const FriendsListV2());
-      case friendChatV2:
-        return CupertinoPageRoute(builder: (_) => const FriendChatV2());
-      case scratchCardV2:
-        return CupertinoPageRoute(builder: (_) => const ScratchCardV2());
-      case categorySelectionTabsV2:
-        return CupertinoPageRoute(builder: (_) => const CategorySelectionTabsV2());
-      case homeQuizFeedV2:
-        return CupertinoPageRoute(builder: (_) => const HomeQuizFeedV2());
-      case referralEarnV2:
-        return CupertinoPageRoute(builder: (_) => const ReferralEarnV2());
       default:
         return CupertinoPageRoute(builder: (_) => const Scaffold());
     }
