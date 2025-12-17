@@ -97,7 +97,7 @@ class _NumberPuzzleGameScreenState extends State<NumberPuzzleGameScreen> {
                       color: const Color(0xFF5C6BC0),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Icon(Icons.refresh, color: Colors.white),
                     ),
                   ),
@@ -115,10 +115,10 @@ class _NumberPuzzleGameScreenState extends State<NumberPuzzleGameScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 30,
-                      backgroundColor: const Color(0xFFE8EAF6),
-                      child: Icon(Icons.person, size: 30, color: const Color(0xFF5C6BC0)),
+                      backgroundColor: Color(0xFFE8EAF6),
+                      child: Icon(Icons.person, size: 30, color: Color(0xFF5C6BC0)),
                     ),
                     Column(
                       children: [
@@ -139,10 +139,10 @@ class _NumberPuzzleGameScreenState extends State<NumberPuzzleGameScreen> {
                         ),
                       ],
                     ),
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 30,
-                      backgroundColor: const Color(0xFFFFCDD2),
-                      child: Icon(Icons.person, size: 30, color: const Color(0xFFE57373)),
+                      backgroundColor: Color(0xFFFFCDD2),
+                      child: Icon(Icons.person, size: 30, color: Color(0xFFE57373)),
                     ),
                   ],
                 ),
@@ -215,9 +215,9 @@ class _NumberPuzzleGameScreenState extends State<NumberPuzzleGameScreen> {
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.star, color: Colors.white),
                           SizedBox(width: 8),
                           Text(
@@ -242,9 +242,9 @@ class _NumberPuzzleGameScreenState extends State<NumberPuzzleGameScreen> {
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
+                        children: [
                           Icon(Icons.star, color: Colors.white),
                           SizedBox(width: 8),
                           Text(
