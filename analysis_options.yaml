@@ -1,0 +1,157 @@
+linter:
+  rules:
+    # Core error rules only
+    - avoid_empty_else
+    - avoid_print
+    - avoid_relative_lib_imports
+    - avoid_returning_null_for_future
+    - avoid_returning_null_for_void
+    - avoid_slow_async_io
+    - cancel_subscriptions
+    - close_sinks
+    - control_flow_in_finally
+    - empty_statements
+    - hash_and_equals
+    - invariant_booleans
+    - iterable_contains_unrelated_type
+    - list_remove_unrelated_type
+    - no_adjacent_strings_in_list
+    - no_duplicate_case_values
+    - throw_in_finally
+    - unnecessary_statements
+    - unrelated_type_equality_checks
+    
+    # Important style rules
+    - annotate_overrides
+    - avoid_catches
+    - avoid_double_and_int_checks
+    - avoid_init_to_null
+    - avoid_null_checks_in_equality_operators
+    - avoid_positional_boolean_parameters
+    - avoid_private_typedef_functions
+    - avoid_returning_null_for_void
+    - avoid_returning_this
+    - avoid_shadowing_type_parameters
+    - avoid_single_cascade_in_expression_statements
+    - avoid_types_as_parameter_names
+    - await_only_futures
+    - camel_case_extensions
+    - camel_case_types
+    - curly_braces_in_flow_control_structures
+    - empty_catches
+    - empty_constructor_bodies
+    - file_names: error
+    - implementation_imports
+    - library_names
+    - library_prefixes
+    - library_private_types_in_public_api
+    - no_leading_underscores_for_library_prefixes
+    - no_leading_underscores_for_local_variables
+    - null_closures
+    - only_throw_errors
+    - overridden_fields
+    - package_names
+    - package_prefixed_library_names
+    - prefer_adjacent_string_concatenation
+    - prefer_asserts_in_initializer_lists
+    - prefer_async_await
+    - prefer_collection_literals
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - prefer_contains
+    - prefer_expression_function_bodies
+    - prefer_final_fields
+    - prefer_final_locals: false
+    - prefer_foreach
+    - prefer_generic_function_type_aliases
+    - prefer_if_elements_to_conditional_expressions
+    - prefer_if_null_to_conditional_expression
+    - prefer_initializing_formal_parameters
+    - prefer_inlined_adds
+    - prefer_int_literals
+    - prefer_interpolation_to_compose_strings
+    - prefer_is_empty
+    - prefer_is_not_empty
+    - prefer_is_not_operator
+    - prefer_is_operator
+    - prefer_iterable_whereType
+    - prefer_mixin
+    - prefer_null_aware_operators
+    - prefer_relative_imports
+    - prefer_single_quotes
+    - provide_deprecation_message
+    - recursive_getters
+    - sized_box_for_whitespace
+    - sized_box_shrink
+    - slash_for_doc_comments
+    - sort_child_properties_last
+    - sort_constructors_first
+    - sort_pub_dependencies
+    - type_init_formals
+    - unawaited_futures: false
+    - unnecessary_await_in_return
+    - unnecessary_brace_in_string_interps
+    - unnecessary_const
+    - unnecessary_constructor_name
+    - unnecessary_getters_setters
+    - unnecessary_lambdas
+    - unnecessary_new
+    - unnecessary_null_aware_assignments
+    - unnecessary_null_checks
+    - unnecessary_null_in_if_null_operators
+    - unnecessary_null_keyword
+    - unnecessary_object_in_string_interpolation
+    - unnecessary_overrides
+    - unnecessary_parenthesis
+    - unnecessary_statements
+    - unnecessary_string_escapes
+    - unnecessary_string_interpolations
+    - unnecessary_this
+    - use_build_context_synchronously: false
+    - use_full_hex_values_for_flutter_colors
+    - use_function_type_syntax_for_parameters
+    - use_key_in_widget_constructors
+    - use_rethrow_when_possible
+    - use_setters_to_change_properties
+    - use_string_buffers
+    - use_test_throws_matchers
+    - void_checks
+
+analyzer:
+  plugins:
+    - dart_code_metrics
+  errors:
+    file_names: error
+
+dart_code_metrics:
+  extends:
+    - package:dart_code_metrics_presets/all.yaml
+  metrics:
+    cyclomatic-complexity: 20
+    number-of-parameters: 4
+    maximum-nesting-level: 4
+    lines-of-code: 100
+    maintainability-index: 50
+    number-of-methods: 10
+
+  metrics-exclude:
+    - test/**
+  rules:
+    - avoid-dynamic
+    - avoid-passing-async-when-sync-expected
+    - avoid-redundant-async
+    - avoid-unnecessary-type-assertions
+    - avoid-unnecessary-type-casts
+    - avoid-unrelated-type-assertions
+    - avoid-unused-parameters
+    - avoid-nested-conditional-expressions
+    - newline-before-return
+    - no-boolean-literal-compare
+    - no-empty-block
+    - prefer-trailing-comma
+    - prefer-conditional-expressions
+    - no-equal-then-else
+    - prefer-moving-to-variable
+    - prefer-match-file-name

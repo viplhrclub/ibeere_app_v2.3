@@ -1,0 +1,98 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check ownership
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // User profiles - read own, create on auth trigger
+    match /users/{userId} {
+      allow read: if isOwner(userId) || request.query.limit <= 100;
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+
+      // User's transactions subcollection
+      match /transactions/{txnId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // User's badges subcollection
+      match /badges/{badgeId} {
+        allow read: if isOwner(userId);
+        allow write: if false;  // Written by functions only
+      }
+    }
+
+    // Quiz questions - readable by all authenticated users
+    match /questions/{questionId} {
+      allow read: if request.auth != null;
+      allow write: if false;  // Admin only
+    }
+
+    // Quiz results - own results readable, all creatable
+    match /quiz_results/{resultId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow write: if false;  // Prevent modifications after creation
+    }
+
+    // Payment transactions - own transactions readable
+    match /transactions/{txnId} {
+      allow read: if request.auth != null && resource.data.uid == request.auth.uid;
+      allow create: if request.auth != null;
+      allow update: if false;  // Updated by webhook functions only
+      allow delete: if false;  // Never delete
+    }
+
+    // Leaderboard positions - read-only for all
+    match /leaderboard/{entry} {
+      allow read: if request.auth != null;
+      allow write: if false;  // Updated by scheduled functions only
+    }
+
+    // Achievements/badges - read only
+    match /achievements/{achievementId} {
+      allow read: if request.auth != null;
+      allow write: if false;  // Admin only
+    }
+
+    // Battle rooms - readable and writable by participants
+    match /battles/{battleId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update: if request.auth.uid in resource.data.participants;
+
+      match /moves/{moveId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null;
+      }
+    }
+
+    // Friend requests and social
+    match /friends/{docId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to
+      );
+      allow create, update: if request.auth != null;
+    }
+
+    // Chat messages
+    match /chats/{chatId} {
+      allow read: if request.auth != null && request.auth.uid in resource.data.participants;
+      allow create: if request.auth != null;
+
+      match /messages/{messageId} {
+        allow read: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow create: if request.auth != null && request.auth.uid == request.resource.data.from;
+      }
+    }
+
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
